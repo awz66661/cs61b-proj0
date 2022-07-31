@@ -114,6 +114,74 @@ public class Model extends Observable {
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
 
+        /* first try of up only*/
+        board.setViewingPerspective(side);
+        for(int i = 0; i < board.size(); i++){
+            if(board.tile(i, 0) != null && board.tile(i, 1) != null && board.tile(i, 2) != null && board.tile(i, 3) != null ) {
+                if (board.tile(i, 0).value() == board.tile(i, 1).value() && board.tile(i, 1).value() == board.tile(i, 2).value() && board.tile(i, 2).value() == board.tile(i, 3).value()) {
+                    score += board.tile(i, 0).value() * 4;
+                    Tile t = board.tile(i, 2);
+                    board.move(i, 3, t);
+                    t = board.tile(i, 1);
+                    board.move(i, 2, t);
+                    t = board.tile(i, 0);
+                    board.move(i, 2, t);
+                    changed = true;
+                    continue;
+                }
+            }
+            boolean is_first = true;
+            boolean is_merged = false;
+            for(int j = board.size() - 1; j >= 0; j--){
+                if(board.tile(i, j) != null){
+                    if(is_first){
+                        if(board.tile(i, board.size() - 1) == null){
+                            Tile t1 = board.tile(i, j);
+                            board.move(i, board.size() - 1, t1);
+                            changed = true;
+                            is_first = false;
+                            continue;
+                        }
+                    }
+                    Tile t = board.tile(i, j);
+                    int move_d = j;
+                    for(int k = move_d + 1; k < board.size(); k++){
+                        if(board.tile(i, k) != null && board.tile(i, j).value() == board.tile(i, k).value() && is_merged == false){
+                            move_d = k;
+                            if(k == board.size() - 1 && j == board.size() - 2){
+                                is_merged = true;
+                            }
+                            score += board.tile(i, j).value() * 2;
+                            break;
+                        } else if (board.tile(i, k) != null && board.tile(i, j).value() == board.tile(i, k).value() && is_merged ) {
+                            move_d = k - 1;
+                            break;
+                        }
+                        if (board.tile(i, k) != null && board.tile(i, j).value() != board.tile(i, k).value()) {
+                            move_d = k - 1;
+                            break;
+                        }
+                    }
+                    if(move_d != j){
+                        board.move(i, move_d, t);
+                        changed = true;
+                    }
+                }
+            }
+        }
+        board.setViewingPerspective(Side.NORTH);
+
+        /*first try end*/
+
+        /*this is the second try for the project:*/
+        /*the second try should fix follow questions:
+        1.There is no scores functions are called in the methods
+        2.Double merging of when there is three numbers to merge
+        3.The question of the problems remains
+         */
+
+        /*second try end*/
+
         checkGameOver();
         if (changed) {
             setChanged();
@@ -139,8 +207,8 @@ public class Model extends Observable {
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
         boolean if_empty = false;
-        for(int i = 0; i < 4; i++){
-            for(int j = 0; j < 4; j++){
+        for(int i = 0; i < b.size(); i++){
+            for(int j = 0; j < b.size(); j++){
                 if(b.tile(i,j) == null){
                     if_empty = true;
                 }
@@ -160,8 +228,8 @@ public class Model extends Observable {
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
         boolean if_max = false;
-        for(int i = 0; i < 4; i++){
-            for(int j = 0; j < 4; j++){
+        for(int i = 0; i < b.size(); i++){
+            for(int j = 0; j < b.size(); j++){
                 if(b.tile(i,j) == null){
                     continue;
                 }
@@ -188,15 +256,15 @@ public class Model extends Observable {
             return true;
         }else{
             boolean if_equal = false;
-            for(int i = 0; i < 4; i++){
-                for(int j = 0; j < 3; j++){
+            for(int i = 0; i < b.size(); i++){
+                for(int j = 0; j < b.size() - 1; j++){
                     if(b.tile(i,j).value() == b.tile(i,j + 1).value()){
                         if_equal = true;
                     }
                 }
             }
-            for(int j = 0; j < 4; j++){
-                for(int i = 0; i < 3; i++){
+            for(int j = 0; j < b.size(); j++){
+                for(int i = 0; i < b.size() - 1; i++){
                     if(b.tile(i,j).value() == b.tile(i + 1, j).value()){
                         if_equal = true;
                     }
